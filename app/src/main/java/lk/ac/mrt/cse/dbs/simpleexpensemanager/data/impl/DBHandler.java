@@ -23,7 +23,7 @@ public class DBHandler extends SQLiteOpenHelper {
 
     /* This class handles all the database operations*/
 
-    public static final String DB_NAME = "ExpenseManager.db";
+    public static final String DB_NAME = "130209D.db";
     /* column names and table name for accounts table which holds data about accounts */
     public static final String ACCOUNTS_TABLE_NAME = "accounts";
     public static final String ACCOUNTS_COLUMN_ACCOUNTNO = "accountNo";
