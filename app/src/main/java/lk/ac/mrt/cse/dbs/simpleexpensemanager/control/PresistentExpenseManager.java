@@ -24,7 +24,7 @@ public class PresistentExpenseManager extends ExpenseManager {
         DBHandler dbHandler = DBHandler.getInstance(context);
         PresistentAccountDAO presistentAccountDAO = new PresistentAccountDAO(dbHandler);
         setAccountsDAO(presistentAccountDAO);
-        PresistentTransactionDAO presistentTransactionDAO = new PresistentTransactionDAO();
+        PresistentTransactionDAO presistentTransactionDAO = new PresistentTransactionDAO(dbHandler);
         setTransactionsDAO(presistentTransactionDAO);
         getAccountsDAO().addAccount(new Account("12345A", "Yoda Bank", "Anakin Skywalker", 10000.0));
         getAccountsDAO().addAccount(new Account("78945Z", "Clone BC", "Obi-Wan Kenobi", 80000.0));

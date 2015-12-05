@@ -95,7 +95,7 @@ public class DBHandler extends SQLiteOpenHelper {
 
     public Account getAccount(String accountNO){
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor result = db.rawQuery("select * from " + ACCOUNTS_TABLE_NAME + " where " + ACCOUNTS_COLUMN_ACCOUNTNO + "=" + accountNO + ";", null);
+        Cursor result = db.rawQuery("select * from " + ACCOUNTS_TABLE_NAME + " where " + ACCOUNTS_COLUMN_ACCOUNTNO + "= '" + accountNO + "';", null);
         result.moveToFirst();
         if (result.getCount()==0){
             db.close();
