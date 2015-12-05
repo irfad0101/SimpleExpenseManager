@@ -15,6 +15,7 @@ public class PresistentExpenseManager extends ExpenseManager {
     private Context context;
 
     public PresistentExpenseManager(Context context){
+        // context is required for DBHandler
         this.context = context;
         setup();
     }
@@ -26,6 +27,7 @@ public class PresistentExpenseManager extends ExpenseManager {
         setAccountsDAO(presistentAccountDAO);
         PresistentTransactionDAO presistentTransactionDAO = new PresistentTransactionDAO(dbHandler);
         setTransactionsDAO(presistentTransactionDAO);
+        // add dummy information
         getAccountsDAO().addAccount(new Account("12345A", "Yoda Bank", "Anakin Skywalker", 10000.0));
         getAccountsDAO().addAccount(new Account("78945Z", "Clone BC", "Obi-Wan Kenobi", 80000.0));
     }

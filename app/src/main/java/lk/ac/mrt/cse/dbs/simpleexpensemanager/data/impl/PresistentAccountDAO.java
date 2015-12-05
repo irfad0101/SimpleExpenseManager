@@ -31,7 +31,7 @@ public class PresistentAccountDAO implements AccountDAO {
     @Override
     public Account getAccount(String accountNo) throws InvalidAccountException {
         Account account = dbHandler.getAccount(accountNo);
-        if (account==null){
+        if (account==null){ // get account method returns null if no matching account found
             String msg = "The accountNo" + accountNo + "does not exist!";
             throw new InvalidAccountException(msg);
         }
