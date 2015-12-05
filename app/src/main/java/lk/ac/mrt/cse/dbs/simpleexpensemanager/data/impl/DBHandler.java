@@ -6,10 +6,15 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import lk.ac.mrt.cse.dbs.simpleexpensemanager.data.model.Account;
+import lk.ac.mrt.cse.dbs.simpleexpensemanager.data.model.ExpenseType;
+import lk.ac.mrt.cse.dbs.simpleexpensemanager.data.model.Transaction;
 
 /**
  * Created by Irfad Hussain on 12/4/2015.
@@ -127,9 +132,76 @@ public class DBHandler extends SQLiteOpenHelper {
     public void updateAccountBalance(Account account){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(ACCOUNTS_COLUMN_BALANCE,account.getBalance());
+        values.put(ACCOUNTS_COLUMN_BALANCE, account.getBalance());
         db.update(ACCOUNTS_TABLE_NAME,values,ACCOUNTS_COLUMN_ACCOUNTNO+" = ?",new String[]{account.getAccountNo()});
         db.close();
+    }
+
+    public void addTransaction(Transaction transaction){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(TRANSACTIONS_COLUMN_ACCOUNTNO,transaction.getAccountNo());
+        values.put(TRANSACTIONS_COLUMN_TYPE,(transaction.getExpenseType()== ExpenseType.INCOME) ? 1 : -1);
+        values.put(TRANSACTIONS_COLUMN_AMOUNT,transaction.getAmount());
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        String date = sdf.format(transaction.getDate());
+        values.put(TRANSACTIONS_COLUMN_DATE,date);
+        db.insert(TRANSACTIONS_TABLE_NAME, null, values);
+        db.close();
+    }
+
+    public List<Transaction> getAllTransactions(){
+        List<Transaction> transactions = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor results = db.rawQuery("select * from " + TRANSACTIONS_TABLE_NAME + ";", null);
+        results.moveToFirst();
+        while (!results.isAfterLast()){
+            String accoutNo = results.getString(results.getColumnIndex(TRANSACTIONS_COLUMN_ACCOUNTNO));
+            ExpenseType type = (results.getInt(results.getColumnIndex(TRANSACTIONS_COLUMN_TYPE))==1)? ExpenseType.INCOME:ExpenseType.EXPENSE;
+            double amount = results.getDouble(results.getColumnIndex(TRANSACTIONS_COLUMN_AMOUNT));
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+            Date date = null;
+            try {
+                date = sdf.parse(results.getString(results.getColumnIndex(TRANSACTIONS_COLUMN_DATE)));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            transactions.add(new Transaction(date,accoutNo,type,amount));
+            results.moveToNext();
+        }
+        db.close();
+        return transactions;
+    }
+
+    public List<Transaction> getPaginatedTransactions(int limit){
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.rawQuery("select count(*) from "+TRANSACTIONS_TABLE_NAME+";",null);
+        c.moveToFirst();
+        int rowCount = c.getInt(0);
+        if(rowCount<=limit){
+            db.close();
+            return getAllTransactions();
+        }else{
+            List<Transaction> transactions = new ArrayList<>();
+            c = db.rawQuery("select * from " + TRANSACTIONS_TABLE_NAME + " limit 10 offset "+Integer.toString(rowCount-10)+";", null);
+            c.moveToFirst();
+            while (!c.isAfterLast()){
+                String accoutNo = c.getString(c.getColumnIndex(TRANSACTIONS_COLUMN_ACCOUNTNO));
+                ExpenseType type = (c.getInt(c.getColumnIndex(TRANSACTIONS_COLUMN_TYPE))==1)? ExpenseType.INCOME:ExpenseType.EXPENSE;
+                double amount = c.getDouble(c.getColumnIndex(TRANSACTIONS_COLUMN_AMOUNT));
+                SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+                Date date = null;
+                try {
+                    date = sdf.parse(c.getString(c.getColumnIndex(TRANSACTIONS_COLUMN_DATE)));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                transactions.add(new Transaction(date,accoutNo,type,amount));
+                c.moveToNext();
+            }
+            db.close();
+            return  transactions;
+        }
     }
 
 }
